@@ -23,17 +23,47 @@
     padding: 20px;
     box-shadow: 0 10px 40px rgba(0,0,0,.5);
   }
+  .topbar {
+    display: flex;
+    margin-bottom: 16px;
+  }
+  .insurance {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    background: #0a84ff;
+    color: #fff;
+    transition: background .15s, transform .05s;
+  }
+  .insurance:hover { background: #2b9bff; }
+  .insurance:active { transform: scale(.94); }
+  .insurance svg { width: 28px; height: 28px; }
   .panel {
     background: #000;
     color: #fff;
     border-radius: 14px;
-    padding: 24px 20px;
+    padding: 18px 20px 24px;
     text-align: right;
+    margin-bottom: 16px;
+    min-height: 110px;
+    overflow-wrap: anywhere;
+  }
+  .diff {
+    font-size: 18px;
+    font-weight: 400;
+    color: #8e8e93;
+    min-height: 22px;
+    margin-bottom: 4px;
+  }
+  .total {
     font-size: 56px;
     font-weight: 300;
-    margin-bottom: 16px;
-    min-height: 96px;
-    overflow-wrap: anywhere;
+    line-height: 1.05;
   }
   .ops {
     display: flex;
@@ -86,11 +116,82 @@
     transition: background .15s;
   }
   .clear:hover { background: #e44; }
+
+  /* Popup */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    z-index: 10;
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    width: 100%;
+    max-width: 420px;
+    background: #2c2c2e;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.6);
+  }
+  .modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    color: #fff;
+  }
+  .modal-head h2 { font-size: 18px; font-weight: 600; }
+  .modal-close {
+    background: #3a3a3c;
+    border: none;
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  .modal-close:hover { background: #48484a; }
+  .base-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .base {
+    padding: 18px 0;
+    font-size: 18px;
+    font-weight: 500;
+    border: 2px solid transparent;
+    border-radius: 14px;
+    cursor: pointer;
+    color: #fff;
+    background: #3a3a3c;
+    transition: background .15s, transform .05s;
+  }
+  .base:hover { background: #48484a; }
+  .base:active { transform: scale(.94); }
+  .base.active { background: #0a84ff; border-color: #5ac8fa; }
 </style>
 </head>
 <body>
   <div class="app">
-    <div class="panel" id="panel">0</div>
+    <div class="topbar">
+      <button class="insurance" id="openBase" title="Seleccionar monto base">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2l8 3v6c0 5-3.4 8.4-8 11-4.6-2.6-8-6-8-11V5l8-3z"/>
+          <path d="M12 8v6M9 11h6"/>
+        </svg>
+      </button>
+    </div>
+    <div class="panel">
+      <div class="diff" id="diff">+0</div>
+      <div class="total" id="total">0</div>
+    </div>
     <div class="ops">
       <button class="op active" id="opPlus" data-op="+">+</button>
       <button class="op" id="opMinus" data-op="-">&minus;</button>
@@ -99,18 +200,38 @@
     <button class="clear" id="clear">Limpiar</button>
   </div>
 
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>Monto base</h2>
+        <button class="modal-close" id="closeBase">&times;</button>
+      </div>
+      <div class="base-grid" id="baseGrid"></div>
+    </div>
+  </div>
+
 <script>
   const amounts = [1,2,3,4,5,6,7,10,12,16,17,19,24,28,32,34,53,57,192];
-  let total = 0;
+  const baseAmounts = [150,20,35,220,350,40,55,70,150,450,600,830,1750,35,130,380,600,830,1500];
+
+  let baseIndex = 0;            // primer 150 activo por defecto
+  let base = baseAmounts[baseIndex];
+  let total = base;
   let op = "+";
 
-  const panel = document.getElementById("panel");
+  const totalEl = document.getElementById("total");
+  const diffEl = document.getElementById("diff");
   const grid = document.getElementById("grid");
+  const baseGrid = document.getElementById("baseGrid");
   const opPlus = document.getElementById("opPlus");
   const opMinus = document.getElementById("opMinus");
+  const overlay = document.getElementById("overlay");
 
   function render() {
-    panel.textContent = total.toLocaleString("es");
+    totalEl.textContent = total.toLocaleString("es");
+    const d = total - base;
+    const sign = d > 0 ? "+" : (d < 0 ? "−" : "+");
+    diffEl.textContent = sign + Math.abs(d).toLocaleString("es");
   }
 
   function setOp(newOp) {
@@ -134,9 +255,41 @@
   });
 
   document.getElementById("clear").addEventListener("click", () => {
-    total = 0;
+    total = base;
     render();
   });
+
+  // Popup de monto base
+  function highlightBase() {
+    [...baseGrid.children].forEach((b, i) =>
+      b.classList.toggle("active", i === baseIndex));
+  }
+
+  baseAmounts.forEach((n, i) => {
+    const b = document.createElement("button");
+    b.className = "base";
+    b.textContent = n;
+    b.addEventListener("click", () => {
+      baseIndex = i;
+      base = n;
+      total = base;
+      render();
+      closePopup();
+    });
+    baseGrid.appendChild(b);
+  });
+
+  function openPopup() {
+    highlightBase();
+    overlay.classList.add("open");
+  }
+  function closePopup() {
+    overlay.classList.remove("open");
+  }
+
+  document.getElementById("openBase").addEventListener("click", openPopup);
+  document.getElementById("closeBase").addEventListener("click", closePopup);
+  overlay.addEventListener("click", e => { if (e.target === overlay) closePopup(); });
 
   render();
 </script>
