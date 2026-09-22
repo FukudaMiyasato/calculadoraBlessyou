@@ -4,14 +4,51 @@
     {
       "name": "insurance02-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "/Users/Fuku/DEV/Blessyou/insurance02", "run", "dev"],
+      "runtimeArgs": [
+        "--prefix",
+        "/Users/Fuku/DEV/Blessyou/insurance02",
+        "run",
+        "dev"
+      ],
       "port": 5173
     },
     {
       "name": "yttomusic",
       "runtimeExecutable": "/Users/Fuku/DEV/yttomusic/.venv/bin/uvicorn",
-      "runtimeArgs": ["server.app:app", "--app-dir", "/Users/Fuku/DEV/yttomusic", "--host", "127.0.0.1", "--port", "8000"],
+      "runtimeArgs": [
+        "server.app:app",
+        "--app-dir",
+        "/Users/Fuku/DEV/yttomusic",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000"
+      ],
       "port": 8000
+    },
+    {
+      "name": "findecompra",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "5180",
+        "--directory",
+        "/Users/Fuku/DEV/findeComrpa"
+      ],
+      "port": 5180
+    },
+    {
+      "name": "fukudamiyasato",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "5190",
+        "--directory",
+        "/Users/Fuku/DEV/fukudamiyasato"
+      ],
+      "port": 5190
     }
   ]
 }
