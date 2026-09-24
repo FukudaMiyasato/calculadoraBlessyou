@@ -49,6 +49,30 @@
         "/Users/Fuku/DEV/fukudamiyasato"
       ],
       "port": 5190
+    },
+    {
+      "name": "bonnyapp",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8765",
+        "--directory",
+        "/Users/Fuku/DEV/bonnyapp"
+      ],
+      "port": 8765
+    },
+    {
+      "name": "recuerdos",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "5200",
+        "--directory",
+        "/Users/Fuku/DEV/recuerdos"
+      ],
+      "port": 5200
     }
   ]
 }
